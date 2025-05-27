@@ -1,52 +1,188 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Social QR Generator</title>
-  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css"/>
-  <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+  <meta charset="UTF-8">
+  <title>Social Media QR Code Generator</title>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrious/4.0.2/qrious.min.js"></script>
+  <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+  <style>
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(to right, #eef2f3, #ffffff);
+      direction: ltr;
+      text-align: center;
+      padding: 40px;
+      margin: 0;
+    }
+
+    h2 {
+      color: #1f2937;
+      margin-bottom: 30px;
+      font-size: 28px;
+    }
+
+    .container {
+      max-width: 500px;
+      margin: 0 auto;
+    }
+
+    .input-group {
+      display: flex;
+      align-items: center;
+      background: #fff;
+      padding: 12px 15px;
+      border-radius: 12px;
+      margin-bottom: 12px;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.07);
+      transition: box-shadow 0.3s;
+    }
+
+    .input-group:hover {
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .input-group i {
+      font-size: 20px;
+      color: #3b82f6;
+      margin-right: 10px;
+      width: 30px;
+      text-align: center;
+    }
+
+    .input-group input {
+      flex: 1;
+      border: none;
+      outline: none;
+      font-size: 15px;
+      padding: 5px;
+      background: transparent;
+    }
+
+    button {
+      background: #3b82f6;
+      color: white;
+      padding: 14px 30px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      cursor: pointer;
+      margin: 10px 5px 0;
+      transition: background 0.3s;
+    }
+
+    button:hover {
+      background: #2563eb;
+    }
+
+    canvas {
+      margin: 40px auto;
+      display: block;
+    }
+
+    footer {
+      margin-top: 40px;
+      font-size: 14px;
+      color: #888;
+    }
+  </style>
 </head>
-<body class="bg-light">
-  <div class="container py-5">
-    <h2 class="text-center mb-4">Social Media QR Generator</h2>
-    <form id="socialForm" class="row g-3">
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="Facebook URL" id="facebook"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="Instagram URL" id="instagram"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="Twitter URL" id="twitter"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="TikTok URL" id="tiktok"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="YouTube URL" id="youtube"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="LinkedIn URL" id="linkedin"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="Telegram URL" id="telegram"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="WhatsApp URL" id="whatsapp"></div>
-      <div class="col-md-6"><input type="url" class="form-control" placeholder="Snapchat URL" id="snapchat"></div>
-      <div class="col-12 text-center mt-3">
-        <button type="submit" class="btn btn-primary">Generate QR Code</button>
-      </div>
-    </form>
-    <div class="text-center mt-4" id="qrcode"></div>
+<body>
+  <div class="container">
+    <h2>Generate QR Code for Your Social Media</h2>
+
+    <div class="input-group"><i class="fab fa-facebook"></i><input id="facebook" placeholder="Facebook link" type="url"></div>
+    <div class="input-group"><i class="fab fa-twitter"></i><input id="twitter" placeholder="Twitter link" type="url"></div>
+    <div class="input-group"><i class="fab fa-instagram"></i><input id="instagram" placeholder="Instagram link" type="url"></div>
+    <div class="input-group"><i class="fab fa-linkedin"></i><input id="linkedin" placeholder="LinkedIn link" type="url"></div>
+    <div class="input-group"><i class="fab fa-youtube"></i><input id="youtube" placeholder="YouTube link" type="url"></div>
+    <div class="input-group"><i class="fab fa-tiktok"></i><input id="tiktok" placeholder="TikTok link" type="url"></div>
+    <div class="input-group"><i class="fab fa-snapchat"></i><input id="snapchat" placeholder="Snapchat link" type="url"></div>
+    <div class="input-group"><i class="fab fa-whatsapp"></i><input id="whatsapp" placeholder="WhatsApp phone number (e.g. +1234567890)" type="tel"></div>
+    <div class="input-group"><i class="fab fa-telegram"></i><input id="telegram" placeholder="Telegram link" type="url"></div>
+
+    <div class="input-group"><i class="fas fa-image"></i><input id="imageUpload" type="file" accept="image/*"></div>
+
+    <button onclick="generateQRCode()">Generate QR Code</button>
+    <button onclick="downloadQR()">Download QR Code</button>
+
+    <canvas id="qr-code" width="280" height="280"></canvas>
   </div>
 
+  <footer>© 2025 Social QR Generator</footer>
+
   <script>
-  document.getElementById("socialForm").addEventListener("submit", function(e) {
-    e.preventDefault();
+    function generateQRCode() {
+      const platforms = [
+        { id: 'facebook', label: 'Facebook' },
+        { id: 'twitter', label: 'Twitter' },
+        { id: 'instagram', label: 'Instagram' },
+        { id: 'linkedin', label: 'LinkedIn' },
+        { id: 'youtube', label: 'YouTube' },
+        { id: 'tiktok', label: 'TikTok' },
+        { id: 'snapchat', label: 'Snapchat' },
+        { id: 'whatsapp', label: 'WhatsApp' },
+        { id: 'telegram', label: 'Telegram' },
+      ];
 
-    const fields = ["facebook", "instagram", "twitter", "tiktok", "youtube", "linkedin", "telegram", "whatsapp", "snapchat"];
-    const params = fields.map(f => {
-      const val = document.getElementById(f).value;
-      return val ? `${f}=${encodeURIComponent(val)}` : '';
-    }).filter(Boolean).join("&");
+      let content = '';
+      platforms.forEach(platform => {
+        let value = document.getElementById(platform.id).value.trim();
+        if (value) {
+          if (platform.id === 'whatsapp') {
+            const phone = value.replace(/[^\d+]/g, '');
+            if (phone) {
+              content += `${platform.label}: https://wa.me/${phone}\n`;
+            }
+          } else {
+            content += `${platform.label}: ${value}\n`;
+          }
+        }
+      });
 
-;const link = `${location.origin}${location.pathname}display.html?${params}`;
+      if (!content.trim()) {
+        alert("Please enter at least one social media link.");
+        return;
+      }
 
-    // توليد QR وعرضه كصورة
-    QRCode.toDataURL(link, { width: 250 }, function (err, url) {
-      if (err) return console.error(err);
-      const qrDiv = document.getElementById("qrcode");
-      qrDiv.innerHTML = `<img src="${url}" alt="QR Code" class="img-fluid mt-3"/>`;
-    });
-  });
+      const qrCanvas = document.getElementById('qr-code');
+      const qr = new QRious({
+        element: qrCanvas,
+        value: content.trim(),
+        size: 280,
+      });
+
+      const fileInput = document.getElementById("imageUpload");
+      const file = fileInput.files[0];
+
+      if (file) {
+        const ctx = qrCanvas.getContext("2d");
+        const img = new Image();
+        const reader = new FileReader();
+        reader.onload = function (e) {
+          img.src = e.target.result;
+          img.onload = function () {
+            const center = qrCanvas.width / 2;
+            const size = 60;
+            ctx.save();
+            ctx.beginPath();
+            ctx.arc(center, center, size / 2, 0, Math.PI * 2);
+            ctx.closePath();
+            ctx.clip();
+            ctx.drawImage(img, center - size / 2, center - size / 2, size, size);
+            ctx.restore();
+          };
+        };
+        reader.readAsDataURL(file);
+      }
+    }
+
+    function downloadQR() {
+      const canvas = document.getElementById('qr-code');
+      const link = document.createElement('a');
+      link.download = 'social-media-qr.png';
+      link.href = canvas.toDataURL();
+      link.click();
+    }
   </script>
-  
 </body>
 </html>
