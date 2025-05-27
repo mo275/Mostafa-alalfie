@@ -37,7 +37,7 @@
       return val ? `${f}=${encodeURIComponent(val)}` : '';
     }).filter(Boolean).join("&");
 
-    const link = `${location.origin}/display.html?${params}`;
+;const link = `${location.origin}${location.pathname}display.html?${params}`;
 
     // توليد QR وعرضه كصورة
     QRCode.toDataURL(link, { width: 250 }, function (err, url) {
